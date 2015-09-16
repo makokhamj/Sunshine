@@ -31,10 +31,11 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class MainActivityFragment extends Fragment {
+
+public class ForecastFragment extends Fragment {
 
     private ArrayAdapter<String> mForecastAdapter;
-    public MainActivityFragment() {
+    public ForecastFragment() {
 
     }
     @Override
@@ -45,7 +46,7 @@ public class MainActivityFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.mainactivityfragment, menu);
+        inflater.inflate(R.menu.forecastfragment, menu);
     }
 
     @Override
