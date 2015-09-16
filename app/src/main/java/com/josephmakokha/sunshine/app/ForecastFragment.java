@@ -61,19 +61,19 @@ public class MainActivityFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
 
-            String[] data = {
-                    "Mon 8/30 - Sunny - 63/78",
-                    "Tue 9/1 - Foggy - 60/68",
-                    "Wed 9/2 - Rainy - 67/72",
-                    "Thur 9/3 - Foggy - 55/67",
-                    "Fri 9/4 - Sunny - 69/88",
-                    "Sat 9/5 - Trapped in Weatherstation - 48/58",
-                    "Sun 9/6 - Foggy - 79/84",
-            };
+        String[] data = {
+                "Mon 8/30 - Sunny - 63/78",
+                "Tue 9/1 - Foggy - 60/68",
+                "Wed 9/2 - Rainy - 67/72",
+                "Thur 9/3 - Foggy - 55/67",
+                "Fri 9/4 - Sunny - 69/88",
+                "Sat 9/5 - Trapped in Weatherstation - 48/58",
+                "Sun 9/6 - Foggy - 79/84",
+        };
 
-            List<String> weekForecast = new ArrayList<String>(Arrays.asList(data));
+        List<String> weekForecast = new ArrayList<String>(Arrays.asList(data));
 
         ArrayAdapter<String> mForecastAdapter = new ArrayAdapter<String>(
                 getActivity(),
@@ -81,86 +81,86 @@ public class MainActivityFragment extends Fragment {
                 R.id.list_item_forecast_textview,
                 weekForecast);
 
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-            ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
-            listView.setAdapter(mForecastAdapter);
-            return rootView;
-        }
+        ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        listView.setAdapter(mForecastAdapter);
+        return rootView;
+    }
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
-            private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
-            private String getReadableDateString(long time){
+        private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+        private String getReadableDateString(long time){
             SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
-                return shortenedDateFormat.format(time);
+            return shortenedDateFormat.format(time);
+        }
+
+        private String formatHighLows(double high, double low) {
+            // For presentation, assume the user doesn't care about tenths of a degree.
+            long roundedHigh = Math.round(high);
+            long roundedLow = Math.round(low);
+
+            String highLowStr = roundedHigh + "/" + roundedLow;
+            return highLowStr;
+        }
+
+        private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
+                throws JSONException {
+
+            // These are the names of the JSON objects that need to be extracted.
+            final String OWM_LIST = "list";
+            final String OWM_WEATHER = "weather";
+            final String OWM_TEMPERATURE = "temp";
+            final String OWM_MAX = "max";
+            final String OWM_MIN = "min";
+            final String OWM_DESCRIPTION = "main";
+
+            JSONObject forecastJson = new JSONObject(forecastJsonStr);
+            JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
+
+
+            Time dayTime = new Time();
+            dayTime.setToNow();
+
+            int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
+
+            dayTime = new Time();
+
+            String[] resultStrs = new String[numDays];
+            for(int i = 0; i < weatherArray.length(); i++) {
+                String day;
+                String description;
+                String highAndLow;
+
+                JSONObject dayForecast = weatherArray.getJSONObject(i);
+
+                long dateTime;
+                dateTime = dayTime.setJulianDay(julianStartDay+i);
+                day = getReadableDateString(dateTime);
+
+                JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
+                description = weatherObject.getString(OWM_DESCRIPTION);
+
+                JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
+                double high = temperatureObject.getDouble(OWM_MAX);
+                double low = temperatureObject.getDouble(OWM_MIN);
+
+                highAndLow = formatHighLows(high, low);
+                resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
 
-            private String formatHighLows(double high, double low) {
-                // For presentation, assume the user doesn't care about tenths of a degree.
-                long roundedHigh = Math.round(high);
-                long roundedLow = Math.round(low);
-
-                String highLowStr = roundedHigh + "/" + roundedLow;
-                return highLowStr;
+            for (String s : resultStrs) {
+                Log.v(LOG_TAG, "Forecast entry: " + s);
             }
+            return resultStrs;
 
-            private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
-                    throws JSONException {
-
-                // These are the names of the JSON objects that need to be extracted.
-                final String OWM_LIST = "list";
-                final String OWM_WEATHER = "weather";
-                final String OWM_TEMPERATURE = "temp";
-                final String OWM_MAX = "max";
-                final String OWM_MIN = "min";
-                final String OWM_DESCRIPTION = "main";
-
-                JSONObject forecastJson = new JSONObject(forecastJsonStr);
-                JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
-
-
-                Time dayTime = new Time();
-                dayTime.setToNow();
-
-                int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
-
-                dayTime = new Time();
-
-                String[] resultStrs = new String[numDays];
-                for(int i = 0; i < weatherArray.length(); i++) {
-                     String day;
-                    String description;
-                    String highAndLow;
-
-                     JSONObject dayForecast = weatherArray.getJSONObject(i);
-
-                    long dateTime;
-                     dateTime = dayTime.setJulianDay(julianStartDay+i);
-                    day = getReadableDateString(dateTime);
-
-                     JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
-                    description = weatherObject.getString(OWM_DESCRIPTION);
-
-                     JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
-                    double high = temperatureObject.getDouble(OWM_MAX);
-                    double low = temperatureObject.getDouble(OWM_MIN);
-
-                    highAndLow = formatHighLows(high, low);
-                    resultStrs[i] = day + " - " + description + " - " + highAndLow;
-                }
-
-                for (String s : resultStrs) {
-                    Log.v(LOG_TAG, "Forecast entry: " + s);
-                }
-                return resultStrs;
-
-            }
-            @Override
-            protected String[] doInBackground(String... params) {
+        }
+        @Override
+        protected String[] doInBackground(String... params) {
 
             if (params.length == 0) {
                 return null;
-                }
+            }
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -234,7 +234,7 @@ public class MainActivityFragment extends Fragment {
                 e.printStackTrace();
             }
 
-                return null;
+            return null;
         }
     }
 }
