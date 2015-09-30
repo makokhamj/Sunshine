@@ -5,12 +5,7 @@ package com.josephmakokha.sunshine.app;
  */
 
 
-import android.widget.ImageView;
 
-package="com.josephmakokha.sunshine.app" >
-
-
-import android.widget.ImageView;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;

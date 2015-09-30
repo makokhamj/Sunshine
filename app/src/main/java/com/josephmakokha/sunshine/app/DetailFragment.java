@@ -5,9 +5,6 @@ package com.josephmakokha.sunshine.app;
  */
 
 
-import android.database.Cursor;
-
-package="com.josephmakokha.sunshine.app" >
 
 import android.content.Intent;
 import android.database.Cursor;
